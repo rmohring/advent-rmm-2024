@@ -1,0 +1,15 @@
+The pathsetup_line_magic.py file is not meant as a module...
+
+However, if you copy it to your local .ipython folder under:
+
+$HOME/.ipython/profile_default/startup
+
+...it will enable a line magic in jupyterlab that will set up the system PYTHONPATH for you automatically.
+
+Note that it requires the `gitpython` package to be installed.
+
+To add only the git repository root directory, just do:
+%pathsetup
+
+To add the repository root as well as specific subdirectories:
+%pathsetup folder1 [folder2 ...]
