@@ -1,14 +1,17 @@
 import numpy as np
 
 class Gridder:
-    def __init__(self, data=None, T=False, flip=None):
+    def __init__(self, data=None, T=False, flip=None, from_text=False, strip=True, columnar_build=False):
         if data is None:
             self.grid = []
         else:
             if isinstance(data, np.ndarray):
                 self.grid = data.copy()        
             elif isinstance(data, (list, tuple)):
-                self.grid = np.array(data)
+                if from_text:
+                    self.grid = self.build_from_text(data, columnar_build=columnar_build, strip=strip)
+                else:
+                    self.grid = np.array(data)
             elif isinstance(data, Gridder):
                 self.grid = data.grid.copy()
             
@@ -22,8 +25,23 @@ class Gridder:
                     self.grid = np.fliplr(self.grid)
                 else:
                     raise ValueError("flip unknown")
+
+        self.backup = self.grid.copy()
             
 
+    def build_from_text(self, data, columnar_build=False, strip=True):
+        d = []
+        for row in data:
+            if strip:
+                r = row.strip("\n")
+            else:
+                r = row
+            d.append(list(r))
+        if not columnar_build:
+            return np.array(d)
+        else:
+            return np.array(d).T
+        
     def addrow(self, row, strip=False):
         self.columnar_build = False
         if strip:
@@ -49,6 +67,9 @@ class Gridder:
     
     def val(self, tup):
         return self.grid[tup[0],tup[1]]
+    
+    def reset(self):
+        self.grid = self.backup.copy()
     
     @property
     def shape(self):
