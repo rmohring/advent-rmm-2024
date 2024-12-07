@@ -92,6 +92,10 @@ class Gridder:
     
     def pretty(self, sep=""):
         return ("\n".join((sep.join(x) for x in self.grid.tolist())))
+
+    def pp(self, sep=""):
+        print(self.pretty(sep=sep))
+        return
     
     def __str__(self):
         return ("\n".join(("".join(x) for x in self.grid.tolist())))
