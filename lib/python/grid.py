@@ -1,15 +1,18 @@
 import numpy as np
 
 class Gridder:
-    def __init__(self, data=None, T=False, flip=None, from_text=False, strip=True, columnar_build=False):
+    def __init__(self, data=None, shape=None, T=False, flip=None, from_text=False, strip=True): #, columnar_build=False):
         if data is None:
-            self.grid = []
+            if shape is not None:
+                self.grid = np.full(shape, ".")
+            else:
+                self.grid = []
         else:
             if isinstance(data, np.ndarray):
                 self.grid = data.copy()        
             elif isinstance(data, (list, tuple)):
                 if from_text:
-                    self.grid = self.build_from_text(data, columnar_build=columnar_build, strip=strip)
+                    self.grid = self.build_from_text(data, strip=strip) #, columnar_build=columnar_build)
                 else:
                     self.grid = np.array(data)
             elif isinstance(data, Gridder):
@@ -26,10 +29,10 @@ class Gridder:
                 else:
                     raise ValueError("flip unknown")
 
-        self.backup = self.grid.copy()
-            
+        #self.columnar_build = columnar_build
+        self.backup = self.grid.copy()    
 
-    def build_from_text(self, data, columnar_build=False, strip=True):
+    def build_from_text(self, data, strip=True): #, columnar_build=False, ):
         d = []
         for row in data:
             if strip:
@@ -37,39 +40,41 @@ class Gridder:
             else:
                 r = row
             d.append(list(r))
-        if not columnar_build:
-            return np.array(d)
-        else:
-            return np.array(d).T
         
-    def addrow(self, row, strip=False):
-        self.columnar_build = False
-        if strip:
-            r = row.strip("\n")
-        else:
-            r = row
-        self.grid.append(list(r))
+        return np.array(d)
+        
+    # def addrow(self, row, strip=False):
+    #     self.columnar_build = False
+    #     if strip:
+    #         r = row.strip("\n")
+    #     else:
+    #         r = row
+    #     self.grid.append(list(r))
 
-    def addcol(self, row, strip=False):
-        self.columnar_build = True
-        self.addrow(row, strip=strip)
+    # def addcol(self, row, strip=False):
+    #     self.columnar_build = True
+    #     self.addrow(row, strip=strip)
             
-    def done_building(self):
-        self.grid = np.array(self.grid)
-        if self.columnar_build:
-            self.grid = self.grid.T
+    # def done_building(self):
+    #     self.grid = np.array(self.grid)
+    #     if self.columnar_build:
+    #         self.grid = self.grid.T
     
     def integerize(self):
         self.grid = self.grid.astype(int)
 
     def tolist(self):
         return self.grid.tolist()
-    
+
+    def setvals(self, tuplist, val):
+        for x in tuplist:
+            self.setval(x, val)
+        
+    def setval(self, tup, val):
+        self.grid[tup[0],tup[1]] = val
+
     def val(self, tup):
         return self.grid[tup[0],tup[1]]
-    
-    def reset(self):
-        self.grid = self.backup.copy()
 
     def is_offgrid(self, rc):
         return (rc[0]<0) or (rc[0]>=self.grid.shape[0]) or (rc[1]<0) or (rc[1]>=self.grid.shape[1])
@@ -77,6 +82,9 @@ class Gridder:
     def is_ongrid(self, rc):
         return not self.is_offgrid(rc)
 
+    def reset(self):
+        self.grid = self.backup.copy()
+    
     @property
     def shape(self):
         return self.grid.shape
