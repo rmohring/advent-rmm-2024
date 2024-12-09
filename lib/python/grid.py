@@ -70,7 +70,13 @@ class Gridder:
     
     def reset(self):
         self.grid = self.backup.copy()
-    
+
+    def is_offgrid(self, rc):
+        return (rc[0]<0) or (rc[0]>=self.grid.shape[0]) or (rc[1]<0) or (rc[1]>=self.grid.shape[1])
+
+    def is_ongrid(self, rc):
+        return not self.is_offgrid(rc)
+
     @property
     def shape(self):
         return self.grid.shape
