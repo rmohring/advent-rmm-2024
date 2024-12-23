@@ -31,12 +31,8 @@ class Gridder:
 
         #self.columnar_build = columnar_build
         self.backup = self.grid.copy()    
-        # Iterator for all rc pairs
-        self.allpoints = list((x,y) for x in range(self.nrows) for y in range(self.ncols)) 
-
         self.nns = {}
-        self.nns_like_point = {}
-        self.regions = {}
+        self.nns_coords = {}
 
 
     def build_from_text(self, data, strip=True): #, columnar_build=False, ):
@@ -100,10 +96,10 @@ class Gridder:
         self.grid = self.backup.copy()
 
     def set_nearest_neighbors(self, diag=False):
-        for r,c in self.allpoints:
-            self.nns[(r,c)] = self.get_nearest_neighbors( (r,c), diag=diag )
-            self.nns_like_point[(r,c)] = self.nns[(r,c)].get(self.val((r,c)),[])
-            #self.nns_coords[(r,c)] = self.get_nearest_neighbors_coords( (r,c), diag=diag)
+        for r in range(self.nrows):
+            for c in range(self.ncols):
+                self.nns[(r,c)] = self.get_nearest_neighbors( (r,c), diag=diag )
+                #self.nns_coords[(r,c)] = self.get_nearest_neighbors_coords( (r,c), diag=diag)
 
     def get_nearest_neighbors(self, rc_tup, diag=False):
         nns = {}
@@ -123,8 +119,20 @@ class Gridder:
                     nns[val].append( (r+dr, c+dc) )
         return nns        
    
-    def region(self, rc_tup):
-        return self.regions.get(rc_tup, None)
+    # def get_nearest_neighbors_coords(self, rc_tup, diag=False):
+    #     nns = []
+    #     r,c = rc_tup
+    #     for dr,dc in [(0,1),(0,-1),(1,0),(-1,0)]:
+    #         val = (r+dr, c+dc)
+    #         if self.is_ongrid(val):
+    #             nns.append(val)
+    
+    #     if diag:
+    #         for dr,dc in [(1,1),(1,-1),(-1,-1),(-1,1)]:
+    #             val = (r+dr, c+dc)
+    #             if self.is_ongrid(val):
+    #                 nns.append(val)
+    #     return nns 
            
     @property
     def shape(self):
